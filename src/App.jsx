@@ -1,62 +1,98 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Footer from "./components/Footer";
+import TodoItem from "./components/TodoItem";
 
 function App() {
-  const [notes, setNotes] = useState([]);
-  const [input, setInput] = useState("");
+  const [todos, setTodos] = useState([]);
+  const [newTodo, setNewTodo] = useState("");
 
-  const addNote = () => {
-    if (input.trim() !== "") {
-      setNotes([...notes, input]);
-      setInput("");
+  // Load todos from localStorage on initial render
+  useEffect(() => {
+    const savedTodos = localStorage.getItem("todos");
+    if (savedTodos) {
+      setTodos(JSON.parse(savedTodos));
+    }
+  }, []);
+
+  // Save todos to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem("todos", JSON.stringify(todos));
+  }, [todos]);
+
+  const addTodo = () => {
+    if (newTodo.trim() !== "") {
+      setTodos([
+        ...todos,
+        {
+          id: Date.now(),
+          text: newTodo.trim(),
+        },
+      ]);
+      setNewTodo("");
     }
   };
 
-  const deleteNote = (index) => {
-    const newNotes = notes.filter((_, i) => i !== index);
-    setNotes(newNotes);
+  const deleteTodo = (id) => {
+    setTodos(todos.filter((todo) => todo.id !== id));
+  };
+
+  const editTodo = (id, newText) => {
+    if (newText.trim() === "") {
+      deleteTodo(id);
+      return;
+    }
+    setTodos(
+      todos.map((todo) =>
+        todo.id === id ? { ...todo, text: newText.trim() } : todo
+      )
+    );
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      addTodo();
+    }
   };
 
   return (
-    <div className=" min-h-screen flex flex-col justify-between bg-gradient-to-br from-yellow-100 to-yellow-300 p-6">
-      <main className="flex-grow">
-      <div className="flex flex-col items-center">
-        <h1 className="text-4xl font-bold text-gray-800 mb-6">📝 Notes App</h1>
-
-        <div className="flex space-x-4 mb-6">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Write your note here..."
-            className="p-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:border-yellow-500 w-64"
-          />
-          <button
-            onClick={addNote}
-            className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition-all duration-300"
-          >
-            Add Note
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {notes.map((note, index) => (
-            <div
-              key={index}
-              className="bg-white p-4 rounded-lg shadow-md flex flex-col items-center space-y-4"
+    <div className="min-h-screen flex flex-col bg-gray-100">
+      <div className="container mx-auto px-4 py-8 flex-1">
+        <h1 className="text-3xl font-bold text-center mb-8 text-slate-800">
+          Todo List
+        </h1>
+        <div className="max-w-md mx-auto bg-slate-200 p-6 rounded-lg shadow-lg">
+          <div className="flex mb-4">
+            <input
+              type="text"
+              value={newTodo}
+              onChange={(e) => setNewTodo(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Add a new todo..."
+              className="flex-1 p-2 border rounded-l focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              onClick={addTodo}
+              className="px-4 py-2 bg-blue-500 text-white rounded-r hover:bg-blue-600 focus:outline-none"
             >
-              <p className="text-gray-700">{note}</p>
-              <button
-                onClick={() => deleteNote(index)}
-                className="text-sm bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-full transition-all duration-300"
-              >
-                Delete
-              </button>
-            </div>
-          ))}
+              Add
+            </button>
+          </div>
+          <ul className="space-y-2">
+            {todos.length === 0 ? (
+              <p className="text-center text-gray-500">No todos yet. Add one!</p>
+            ) : (
+              todos.map((todo) => (
+                <TodoItem
+                  key={todo.id}
+                  todo={todo}
+                  onDelete={deleteTodo}
+                  onEdit={editTodo}
+                />
+              ))
+            )}
+          </ul>
         </div>
       </div>
-      </main>
       <Footer />
     </div>
   );

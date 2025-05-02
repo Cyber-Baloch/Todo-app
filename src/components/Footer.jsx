@@ -2,9 +2,8 @@ import React from "react";
 
 function Footer() {
   return (
-    <footer className="bg-slate-800 text-white py-8 flex flex-col items-center">
-      <div className="flex justify-center space-x-6 m-0">
-
+    <footer className="bg-slate-800 text-white py-6 flex flex-col items-center mt-auto">
+      <div className="flex justify-center space-x-6 mb-4">
         <a
           href="https://github.com/Cyber-Baloch"
           target="_blank"
@@ -31,10 +30,8 @@ function Footer() {
         >
           <i className="fa-brands fa-x-twitter"></i>
         </a>
-
       </div>
-      <p className="text-sm text-gray-400">&copy; 2025 Awais Baloch. All rights reserved.</p>
-
+      <p className="text-sm text-gray-400 mt-2">&copy; 2025 Awais Baloch. All rights reserved.</p>
     </footer>
   );
 }
